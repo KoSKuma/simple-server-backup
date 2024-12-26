@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+import shutil
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -104,26 +105,51 @@ def backup_files(sources: str, backup_dir: str):
     for source in sources.split(","):
         source_name, source_path = source.split(":")
         backup_file = f"{backup_dir}/backup_{source_name}_{timestamp}.tar.gz"
+        temp_dir = f"{backup_dir}/temp_{source_name}_{timestamp}"
 
         try:
-            # Create tar.gz archive
+            # Create temporary directory
+            os.makedirs(temp_dir, exist_ok=True)
+
+            # Rsync files to temporary directory first
+            rsync_command = [
+                "rsync",
+                "-a",  # Archive mode
+                "--delete",  # Delete extraneous files
+                source_path + "/",  # Source with trailing slash
+                temp_dir + "/",  # Destination with trailing slash
+            ]
+
+            # Execute rsync
+            subprocess.run(rsync_command, check=True, capture_output=True, text=True)
+
+            # Create tar.gz archive from temporary directory
             command = [
                 "tar",
                 "-czf",  # Create gzipped tar archive
                 backup_file,  # Output file
-                source_path,  # Source path to backup
+                "-C",
+                temp_dir,
+                ".",  # Change to temp dir and backup everything
             ]
 
             # Execute backup
-            result = subprocess.run(command, check=True, capture_output=True, text=True)
+            subprocess.run(command, check=True, capture_output=True, text=True)
             print(f"File backup successfully created at: {backup_file}")
+
+            # Cleanup temporary directory
+            shutil.rmtree(temp_dir)
             return True
 
         except subprocess.CalledProcessError as e:
             print(f"File backup failed with error: {e.stderr}")
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir)
             return False
         except Exception as e:
             print(f"An error occurred during file backup: {str(e)}")
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir)
             return False
 
 
