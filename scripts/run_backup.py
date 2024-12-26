@@ -3,6 +3,7 @@
 import os
 import subprocess
 import shutil
+import time
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -122,7 +123,12 @@ def backup_files(sources: str, backup_dir: str):
             ]
 
             # Execute rsync
-            subprocess.run(rsync_command, check=True, capture_output=True, text=True)
+            result = subprocess.run(
+                rsync_command, check=True, capture_output=True, text=True
+            )
+            while result.returncode is None:
+                time.sleep(1)
+                continue
 
             # Create tar.gz archive from temporary directory
             command = [
@@ -135,7 +141,10 @@ def backup_files(sources: str, backup_dir: str):
             ]
 
             # Execute backup
-            subprocess.run(command, check=True, capture_output=True, text=True)
+            result = subprocess.run(command, check=True, capture_output=True, text=True)
+            while result.returncode is None:
+                time.sleep(1)
+                continue
             print(f"File backup successfully created at: {backup_file}")
 
             # Cleanup temporary directory
