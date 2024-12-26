@@ -101,7 +101,7 @@ def backup_files(sources: str, backup_dir: str):
     os.makedirs(backup_dir, exist_ok=True)
 
     # Generate backup filename with timestamp
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now().strftime("%Y%m%d")
     for source in sources.split(","):
         print(f"Backing up {source}")
         source_name, source_path = source.split(":")
