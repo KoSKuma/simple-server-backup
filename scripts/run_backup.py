@@ -126,6 +126,67 @@ def backup_files(source_path):
         return False
 
 
+def backup_mysql_databases(
+    db_names: str,
+    db_user: str,
+    db_password: str,
+    db_host: str,
+    db_port: int,
+    backup_dir: str,
+):
+    # Create backup directory if it doesn't exist
+    os.makedirs(backup_dir, exist_ok=True)
+
+    for db_name in db_names.split(","):
+        # Generate backup filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d")
+        backup_file = f"{backup_dir}/backup_{db_name}_{timestamp}.sql"
+        success = backup_mysql_database(
+            db_name, db_user, db_password, db_host, db_port, backup_file
+        )
+        if not success:
+            return False
+        success = compress_backup_file(backup_file)
+        if not success:
+            return False
+
+
+def backup_mysql_database(
+    db_name: str,
+    db_user: str,
+    db_password: str,
+    db_host: str,
+    db_port: int,
+    backup_file: str,
+):
+    try:
+        # Construct mysqldump command
+        command = [
+            "mysqldump",
+            "-h",
+            db_host,
+            "-P",
+            str(db_port),
+            "-u",
+            db_user,
+            f"--password={db_password}",
+            db_name,
+        ]
+
+        # Execute backup and write to file
+        with open(backup_file, "w") as f:
+            result = subprocess.run(command, check=True, stdout=f, text=True)
+        print(f"MySQL backup successfully created at: {backup_file}")
+        return True
+
+    except subprocess.CalledProcessError as e:
+        print(f"MySQL backup failed with error: {e.stderr}")
+        return False
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        return False
+
+
 if __name__ == "__main__":
     # Load environment variables from .env file if it exists
     if os.path.exists(".env"):
@@ -139,7 +200,12 @@ if __name__ == "__main__":
     db_port = os.getenv("DB_PORT", "5432")
 
     # Pass environment variables to the function
-    backup_postgresql_databases(
-        db_names, db_user, db_password, db_host, db_port, "backups/postgresql"
-    )
+    # backup_postgresql_databases(
+    #     db_names, db_user, db_password, db_host, db_port, "backups/postgresql"
+    # )
     # backup_files("/home/projects/simple-server-backup")
+
+    # Pass environment variables to the MySQL backup function
+    backup_mysql_databases(
+        db_names, db_user, db_password, db_host, db_port, "backups/mysql"
+    )
