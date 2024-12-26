@@ -95,35 +95,36 @@ def compress_backup_file(backup_file: str):
     return True
 
 
-def backup_files(source_path):
+def backup_files(sources: str, backup_dir: str):
     # Create backup directory if it doesn't exist
-    backup_dir = "backups/files"
     os.makedirs(backup_dir, exist_ok=True)
 
     # Generate backup filename with timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    backup_file = f"{backup_dir}/backup_{timestamp}.tar.gz"
+    for source in sources.split(","):
+        source_path, source_name = source.split(":")
+        backup_file = f"{backup_dir}/backup_{source_name}_{timestamp}.tar.gz"
 
-    try:
-        # Create tar.gz archive
-        command = [
-            "tar",
-            "-czf",  # Create gzipped tar archive
-            backup_file,  # Output file
-            source_path,  # Source path to backup
-        ]
+        try:
+            # Create tar.gz archive
+            command = [
+                "tar",
+                "-czf",  # Create gzipped tar archive
+                backup_file,  # Output file
+                source_path,  # Source path to backup
+            ]
 
-        # Execute backup
-        result = subprocess.run(command, check=True, capture_output=True, text=True)
-        print(f"File backup successfully created at: {backup_file}")
-        return True
+            # Execute backup
+            result = subprocess.run(command, check=True, capture_output=True, text=True)
+            print(f"File backup successfully created at: {backup_file}")
+            return True
 
-    except subprocess.CalledProcessError as e:
-        print(f"File backup failed with error: {e.stderr}")
-        return False
-    except Exception as e:
-        print(f"An error occurred during file backup: {str(e)}")
-        return False
+        except subprocess.CalledProcessError as e:
+            print(f"File backup failed with error: {e.stderr}")
+            return False
+        except Exception as e:
+            print(f"An error occurred during file backup: {str(e)}")
+            return False
 
 
 def backup_mysql_databases(
@@ -203,7 +204,7 @@ if __name__ == "__main__":
     # backup_postgresql_databases(
     #     db_names, db_user, db_password, db_host, db_port, "backups/postgresql"
     # )
-    # backup_files("/home/projects/simple-server-backup")
+    backup_files("/home/projects/simple-server-backup", "backups/files")
 
     # Pass environment variables to the MySQL backup function
     backup_mysql_databases(
