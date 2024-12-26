@@ -216,6 +216,7 @@ def backup_mysql_database(
 
 
 if __name__ == "__main__":
+    print("Starting backup at", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     # Load environment variables from .env file if it exists
     if os.path.exists(".env"):
         load_dotenv()
@@ -238,3 +239,5 @@ if __name__ == "__main__":
     backup_mysql_databases(
         db_names, db_user, db_password, db_host, db_port, "backups/mysql"
     )
+    print("Backup completed at", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    print("=" * 80)
