@@ -149,7 +149,6 @@ def backup_files(sources: str, backup_dir: str):
 
             # Cleanup temporary directory
             shutil.rmtree(temp_dir)
-            return True
 
         except subprocess.CalledProcessError as e:
             print(f"File backup failed with error: {e.stderr}")
@@ -161,6 +160,7 @@ def backup_files(sources: str, backup_dir: str):
             if os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir)
             return False
+    return True
 
 
 def backup_mysql_databases(
