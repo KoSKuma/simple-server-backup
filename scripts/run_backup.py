@@ -102,7 +102,7 @@ def backup_files(sources: str, backup_dir: str):
     # Generate backup filename with timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     for source in sources.split(","):
-        source_path, source_name = source.split(":")
+        source_name, source_path = source.split(":")
         backup_file = f"{backup_dir}/backup_{source_name}_{timestamp}.tar.gz"
 
         try:
