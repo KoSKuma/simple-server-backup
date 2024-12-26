@@ -199,12 +199,13 @@ if __name__ == "__main__":
     db_password = os.getenv("DB_PASSWORD")
     db_host = os.getenv("DB_HOST", "localhost")
     db_port = os.getenv("DB_PORT", "5432")
+    file_dirs = os.getenv("FILE_DIRS")
 
     # Pass environment variables to the function
     # backup_postgresql_databases(
     #     db_names, db_user, db_password, db_host, db_port, "backups/postgresql"
     # )
-    backup_files("/home/projects/simple-server-backup", "backups/files")
+    backup_files(file_dirs, "backups/files")
 
     # Pass environment variables to the MySQL backup function
     backup_mysql_databases(
